@@ -40,7 +40,7 @@ impl Layer {
     //z = W*x + b, a = activation(z)
     fn forward(&self, input: &DMatrix<f64>) -> (DMatrix<f64>, DMatrix<f64>) {
         todo!()
-    }
+    } 
 }
 
 pub struct NeuralNetwork {
