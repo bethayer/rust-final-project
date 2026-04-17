@@ -27,19 +27,33 @@ struct Layer {
     weights: DMatrix<f64>,
     biases: DMatrix<f64>,
     //if it is an output layer, true, then we don't need to apply the activation function
-    output: bool
+    output: bool,
+    activation: Activation,
 }
 
 impl Layer {
     //initialize a new layer with random values
-    fn new(input_size: usize, output_size: usize, activation: Activation) -> Self {
-        todo!()
+    fn new(input_size: usize, output_size: usize, output: bool, activation: Activation) -> Self {
+        let mut rng = rand::thread_rng();
+        let weights = 
+        DMatrix::from_fn(output_size, input_size, |_, _| rng.gen_range(-1.0_f64..=1.0_f64));
+        let biases = DMatrix::zeros(output_size, 1);
+        Layer {
+            weights,
+            biases,
+            output,
+            activation,
+        }
     }
-
     //first output is the preactivation-values, second output is the post-activation values
     //z = W*x + b, a = activation(z)
     fn forward(&self, input: &DMatrix<f64>) -> (DMatrix<f64>, DMatrix<f64>) {
-        todo!()
+        let z = &self.weights * input + &self.biases;
+        let mut a = z.clone();
+        if !self.output {
+            a = self.activation.apply_activation(&z);
+        }
+        return (z, a);
     }
 }
 
