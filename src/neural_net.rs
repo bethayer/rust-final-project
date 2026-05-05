@@ -70,7 +70,28 @@ pub struct NeuralNetwork {
 impl NeuralNetwork {
     //initialize a new neural network of a number of hidden layes, where each hidden layer has the same number of nodes
     pub fn new(input_size: usize, num_hidden_layers: usize, hidden_layer_size: usize, output_size: usize, alpha: f64) -> Self {
-        todo!()
+        let mut layers = Vec::new();
+
+        // First hidden layer: input_size -> hidden_layer_size
+        if num_hidden_layers > 0 {
+            layers.push(Layer::new(input_size, hidden_layer_size, false, Activation::ReLu));
+
+            // Middle hidden layers: hidden_layer_size -> hidden_layer_size
+            for _ in 1..num_hidden_layers {
+                layers.push(Layer::new(hidden_layer_size, hidden_layer_size, false, Activation::ReLu));
+            }
+
+            // Output layer: hidden_layer_size -> output_size
+            layers.push(Layer::new(hidden_layer_size, output_size, true, Activation::ReLu));
+        } else {
+            // No hidden layers: input_size -> output_size directly
+            layers.push(Layer::new(input_size, output_size, true, Activation::ReLu));
+        }
+
+        NeuralNetwork {
+            layers,
+            alpha,
+        }
     }
 
     //first output is the list of containing the layers before activation and second is the list of layers after activation
@@ -93,7 +114,50 @@ impl NeuralNetwork {
     //takes in the input, the target values, all pre-activation values, and all post-activation values
     //outputs the weight gradients and the biases gradients
     fn back_prop(&self, input: &DMatrix<f64>, target: &DMatrix<f64>, zs: &Vec<DMatrix<f64>>, activations: &Vec<DMatrix<f64>>) -> (Vec<DMatrix<f64>>, Vec<DMatrix<f64>>) {
-        todo!()
+        let num_layers = self.layers.len();
+        let mut weight_grads: Vec<DMatrix<f64>> = Vec::new();
+        let mut bias_grads: Vec<DMatrix<f64>> = Vec::new();
+
+        // Initialize gradients with zeros
+        for layer in &self.layers {
+            weight_grads.push(DMatrix::zeros(layer.weights.nrows(), layer.weights.ncols()));
+            bias_grads.push(DMatrix::zeros(layer.biases.nrows(), layer.biases.ncols()));
+        }
+
+        // Start with output layer error: delta = (a - target)
+        // For MSE loss with linear output: dL/da = (a - target)
+        let mut delta = activations.last().unwrap() - target;
+
+        // Backpropagate through layers (from last to first)
+        for i in (0..num_layers).rev() {
+            // Get the activation from the previous layer (or input if it's the first layer)
+            let prev_activation = if i == 0 {
+                input
+            } else {
+                &activations[i - 1]
+            };
+
+            // Compute weight gradient: delta * prev_activation^T
+            weight_grads[i] = &delta * prev_activation.transpose();
+
+            // Compute bias gradient: delta
+            bias_grads[i] = delta.clone();
+
+            // Propagate delta to previous layer (if not the first layer)
+            if i > 0 {
+                // delta_prev = (W^T * delta) ⊙ activation'(z)
+                let delta_prev = self.layers[i].weights.transpose() * &delta;
+
+                // Apply activation derivative for hidden layers
+                if !self.layers[i - 1].output {
+                    delta = delta_prev.component_mul(&self.layers[i - 1].activation.derivative(&zs[i - 1]));
+                } else {
+                    delta = delta_prev;
+                }
+            }
+        }
+
+        (weight_grads, bias_grads)
     }
 
     //takes in matrix of inputs where each colum is one sample (input_size * num_samples), matrix of targers where each colum is one target (output_size * num_samples), and the number of epochs
