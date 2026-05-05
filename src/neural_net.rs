@@ -33,22 +33,20 @@ struct Layer {
 
 impl Layer {
     //initialize a new layer with He initialization
-    //weights are scaled by sqrt(2 / input_size) to keep pre-activation values
     //in a reasonable range, which is critical for ReLU networks to train well
-    fn new(input_size: usize, output_size: usize, output: bool, activation: Activation) -> Self {
-        let mut rng = rand::thread_rng();
-        let scale = (2.0 / input_size as f64).sqrt();
-        let weights = DMatrix::from_fn(output_size, input_size, |_, _| {
-            rng.gen_range(-1.0_f64..=1.0_f64) * scale
-        });
-        let biases = DMatrix::zeros(output_size, 1);
-        Layer {
-            weights,
-            biases,
-            output,
-            activation,
-        }
+fn new(input_size: usize, output_size: usize, output: bool, activation: Activation) -> Self {
+    let mut rng = rand::thread_rng();
+    let weights = DMatrix::from_fn(output_size, input_size, |_, _| {
+        rng.gen_range(-1.0_f64..=1.0_f64)
+    });
+    let biases = DMatrix::zeros(output_size, 1);
+    Layer {
+        weights,
+        biases,
+        output,
+        activation,
     }
+}
     //first output is the preactivation-values, second output is the post-activation values
     //z = W*x + b, a = activation(z)
     fn forward(&self, input: &DMatrix<f64>) -> (DMatrix<f64>, DMatrix<f64>) {
