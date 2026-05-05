@@ -51,7 +51,12 @@ impl Layer {
     //first output is the preactivation-values, second output is the post-activation values
     //z = W*x + b, a = activation(z)
     fn forward(&self, input: &DMatrix<f64>) -> (DMatrix<f64>, DMatrix<f64>) {
-        todo!()
+        let z = &self.weights * input + &self.biases;
+        let mut a = z.clone();
+        if !self.output {
+            a = self.activation.apply_activation(&z);
+        }
+        return (z, a);
     } 
 }
 
