@@ -76,7 +76,7 @@ fn build_network_from_user_input() -> NeuralNetwork {
     println!("\n--- Network setup ---");
     let num_hidden_layers: usize = prompt_parse("Number of hidden layers: ");
     let hidden_layer_size: usize = prompt_parse("Neurons per hidden layer: ");
-    let alpha: f64 = prompt_parse("Learning rate (e.g. 0.05): ");
+    let alpha: f64 = prompt_parse("Learning rate: ");
     NeuralNetwork::new(784, num_hidden_layers, hidden_layer_size, 10, alpha)
 }
 
