@@ -8,3 +8,4 @@
  `Cargo build`
 3. Run using cargo:\
  `Cargo run --release`
+ 
