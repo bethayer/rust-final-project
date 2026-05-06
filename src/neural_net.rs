@@ -70,7 +70,16 @@ pub struct NeuralNetwork {
 impl NeuralNetwork {
     //initialize a new neural network of a number of hidden layes, where each hidden layer has the same number of nodes
     pub fn new(input_size: usize, num_hidden_layers: usize, hidden_layer_size: usize, output_size: usize, alpha: f64) -> Self {
-        todo!()
+        let mut layers = Vec::new();
+        let mut prev = input_size;
+
+        for _ in 0..num_hidden_layers {
+            layers.push(Layer::new(prev, hidden_layer_size, false, Activation::ReLu));
+            prev = hidden_layer_size;
+        }
+        layers.push(Layer::new(prev, output_size, true, Activation::ReLu));
+
+        NeuralNetwork { layers, alpha }
     }
 
     //first output is the list of containing the layers before activation and second is the list of layers after activation
