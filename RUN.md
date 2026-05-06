@@ -8,3 +8,11 @@
  `Cargo build`
 3. Run using cargo:\
  `Cargo run --release`
+4. Type: `train`
+5. Our suggested parameters for training when prompted (~75% accuracy):
+- Hidden layers: `2`
+- Neurons: `128`
+- Learning rate: `0.001`
+- Epochs: `5`
+6. Type: `Predict` for 1 test sample
+7. `Quit` when finished
