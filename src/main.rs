@@ -6,8 +6,7 @@ use rand::Rng;
 use std::error::Error;
 use std::io::{self, Write};
 
-/// Convert mnist_reader's `Vec<Vec<f32>>` images and `Vec<u8>` labels into
-/// the column-major DMatrix<f64> shapes the network expects.
+//convert mnist_reader Vec<Vec<f32>> images and Vec<u8> labels into the column-major DMatrix<f64> shapes
 fn to_matrices(images: &[Vec<f32>], labels: &[u8]) -> (DMatrix<f64>, DMatrix<f64>) {
     let num_samples = images.len();
 
@@ -22,8 +21,7 @@ fn to_matrices(images: &[Vec<f32>], labels: &[u8]) -> (DMatrix<f64>, DMatrix<f64
     (inputs, targets)
 }
 
-/// Run inference on every column of `inputs`, compare against one-hot `targets`,
-/// and return (correct, total).
+//run inference on every column of input, compare against one-hot targets, and return (correct, total).
 fn evaluate(nn: &NeuralNetwork, inputs: &DMatrix<f64>, targets: &DMatrix<f64>) -> (usize, usize) {
     let mut correct = 0;
     let total = inputs.ncols();
@@ -49,7 +47,7 @@ fn evaluate(nn: &NeuralNetwork, inputs: &DMatrix<f64>, targets: &DMatrix<f64>) -
     (correct, total)
 }
 
-/// Print a prompt and read a line of trimmed input from stdin.
+//print a prompt and read a line of trimmed input from stdin
 fn prompt(message: &str) -> io::Result<String> {
     print!("{}", message);
     io::stdout().flush()?;
@@ -58,7 +56,7 @@ fn prompt(message: &str) -> io::Result<String> {
     Ok(input.trim().to_string())
 }
 
-/// Repeatedly prompt until the user enters a valid value of type T.
+//prompt until the user enters a valid value of type T
 fn prompt_parse<T: std::str::FromStr>(message: &str) -> T {
     loop {
         match prompt(message) {
@@ -71,7 +69,7 @@ fn prompt_parse<T: std::str::FromStr>(message: &str) -> T {
     }
 }
 
-/// Build a fresh NeuralNetwork from user-supplied hyperparameters.
+//build a fresh NeuralNetwork from user defined parameters
 fn build_network_from_user_input() -> NeuralNetwork {
     println!("\n--- Network setup ---");
     let num_hidden_layers: usize = prompt_parse("Number of hidden layers: ");
@@ -80,7 +78,7 @@ fn build_network_from_user_input() -> NeuralNetwork {
     NeuralNetwork::new(784, num_hidden_layers, hidden_layer_size, 10, alpha)
 }
 
-/// Train an existing network for the given number of epochs and report accuracy.
+//train an existing network for the given number of epochs and report accuracy
 fn run_training(
     nn: &mut NeuralNetwork,
     train_inputs: &DMatrix<f64>,
@@ -110,7 +108,7 @@ fn run_training(
     Ok(())
 }
 
-/// Pick a random test sample, run the network on it, and print prediction vs actual.
+//pick a random test sample, run the network on it, and print prediction vs actual
 fn run_prediction(
     nn: &NeuralNetwork,
     test_inputs: &DMatrix<f64>,
