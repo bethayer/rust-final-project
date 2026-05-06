@@ -1,4 +1,4 @@
-use nalgebra::DMatrix;
+use nalgebra::{DMatrix, DefaultAllocator};
 use rand::Rng;
 
 pub enum Activation {
@@ -100,7 +100,41 @@ impl NeuralNetwork {
     //takes in the input, the target values, all pre-activation values, and all post-activation values
     //outputs the weight gradients and the biases gradients
     fn back_prop(&self, input: &DMatrix<f64>, target: &DMatrix<f64>, zs: &Vec<DMatrix<f64>>, activations: &Vec<DMatrix<f64>>) -> (Vec<DMatrix<f64>>, Vec<DMatrix<f64>>) {
-        todo!()
+        let n = self.layers.len();
+        let mut weight_grad = Vec::new();
+        let mut  bias_grad = Vec::new();
+
+        for layer in &self.layers {
+            weight_grad.push(DMatrix::zeros(layer.weights.nrows(), layer.weights.ncols()));
+            bias_grad.push(DMatrix::zeros(layer.biases.nrows(), 1));
+        }
+
+        let mut delta = &activations[n-1] - target;
+        let prev_a;
+        if n > 1 {
+            prev_a = &activations[n - 2];
+        } else {
+            prev_a = input;
+        }
+
+        weight_grad[n-1] = &delta * prev_a.transpose();
+        bias_grad[n-1] = delta.clone();
+
+        for i in (0..n-1).rev() {
+            let act_deriv = self.layers[i].activation.derivative(&zs[i]);
+            delta = (self.layers[i + 1].weights.transpose() * &delta).component_mul(&act_deriv);
+
+            let prev_a;
+            if i > 0 {
+                prev_a = &activations[i - 1];
+            } else {
+                prev_a = input;
+            }
+            weight_grad[i] = &delta * prev_a.transpose();
+            bias_grad[i] = delta.clone();
+        }
+
+        (weight_grad, bias_grad)
     }
 
     //takes in matrix of inputs where each colum is one sample (input_size * num_samples), matrix of targers where each colum is one target (output_size * num_samples), and the number of epochs
